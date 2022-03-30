@@ -6,6 +6,9 @@
 
 EKS_CLUSTER="cloudgeeks-eks-dev"
 REGION="us-east-1"
+MY_AWS_ACCOUNT="$(aws sts get-caller-identity --query Account --output text)"
+ROLE_NAME="iam-eks-workers-role"
+
 AWS_ACCOUNT_ID="602401143452"
 # https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
 
@@ -15,6 +18,13 @@ curl -o iam_policy_latest.json https://raw.githubusercontent.com/kubernetes-sigs
 
 ## Download specific version
 #curl -o iam_policy_v2.3.1.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.3.1/docs/install/iam_policy.json
+
+# Create a policy
+aws iam create-policy --policy-name ALBLoadBalancerController --policy-document file://iam_policy_latest.json
+
+# Policy attachment to a role
+aws iam attach-role-policy --policy-arn arn:aws:iam::${MY_AWS_ACCOUNT}:policy/ALBLoadBalancerController --role-name $ROLE_NAME
+
 
 helm version --short
 
