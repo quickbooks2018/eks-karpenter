@@ -25,5 +25,4 @@ spec:
       karpenter.sh/discovery: cloudgeeks-eks-dev  # cluster name
     securityGroupSelector:
       karpenter.sh/discovery: cloudgeeks-eks-dev  # cluster name
-    instanceProfile: KarpenterNodeInstanceProfile-cloudgeeks-eks-dev
   ttlSecondsAfterEmpty: 30
