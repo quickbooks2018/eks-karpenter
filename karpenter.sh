@@ -5,7 +5,8 @@
 
 export CLUSTER_NAME="cloudgeeks-eks-dev"
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name ${CLUSTER_NAME} --query "cluster.endpoint" --output text)"
-export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::966399774209:role/karpenter-controller-cloudgeeks-eks-dev"
+export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/karpenter-controller-${CLUSTER_NAME}"
 
 echo $CLUSTER_NAME
 echo $CLUSTER_ENDPOINT
@@ -23,4 +24,3 @@ helm upgrade --install karpenter karpenter/karpenter --namespace karpenter \
 
 
  # End 
-
