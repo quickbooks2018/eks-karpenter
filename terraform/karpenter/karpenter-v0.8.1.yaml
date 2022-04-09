@@ -1,0 +1,29 @@
+---
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default
+spec:
+  labels:
+    team: dev-team
+  requirements:
+    # - key: node.kubernetes.io/instance-type
+    #   operator: In
+    #   values: [t3a.large, t3.medium]           # Instances type/size
+    - key: topology.kubernetes.io/zone
+      operator: In
+      values: [us-east-1a, us-east-1b, us-east-1c] #Zones
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["on-demand"]
+  limits:
+    resources:
+      cpu: 1000
+      memory: 1000Gi
+  provider:
+    subnetSelector:
+      karpenter.sh/discovery: cloudgeeks-eks-dev  # cluster name
+    securityGroupSelector:
+      karpenter.sh/discovery: cloudgeeks-eks-dev  # cluster name
+    instanceProfile: KarpenterNodeInstanceProfile-cloudgeeks-eks-dev
+  ttlSecondsAfterEmpty: 30
