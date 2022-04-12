@@ -1,12 +1,12 @@
 #!/bin/bash
-# https://karpenter.sh/v0.8.1/getting-started/getting-started-with-eksctl/
+# https://karpenter.sh/v0.8.2/getting-started/getting-started-with-eksctl/
 
 
 export CLUSTER_NAME="cloudgeeks-eks-dev"
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name ${CLUSTER_NAME} --query "cluster.endpoint" --output text)"
 export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/karpenter-controller-${CLUSTER_NAME}"
-export KARPENTER_VERSION=v0.8.1
+export KARPENTER_VERSION=v0.8.2
 
 echo $CLUSTER_NAME
 echo $CLUSTER_ENDPOINT
