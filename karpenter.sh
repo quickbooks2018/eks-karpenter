@@ -1,12 +1,27 @@
 #!/bin/bash
 # https://karpenter.sh/v0.8.2/getting-started/getting-started-with-eksctl/
+# # https://karpenter.sh/v0.8.2/getting-started/migrating-from-cas/
 
 
 export CLUSTER_NAME="cloudgeeks-eks-dev"
+export REGION="us-east-1"
+export VPC_ID=$(aws eks describe-cluster --name ${CLUSTER_NAME} --region $REGION | awk '{print $5}' | grep -i vpc)
 export CLUSTER_ENDPOINT="$(aws eks describe-cluster --name ${CLUSTER_NAME} --query "cluster.endpoint" --output text)"
 export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
 export KARPENTER_IAM_ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT_ID}:role/karpenter-controller-${CLUSTER_NAME}"
 export KARPENTER_VERSION=v0.8.2
+
+
+echo $VPC_ID
+SECURITY_GROUPS=$(aws ec2 describe-security-groups --region $REGION --filter Name=vpc-id,Values=${VPC_ID} Name=group-name,Values=${CLUSTER_NAME}* --query 'SecurityGroups[*].[GroupId]' --output text)
+
+export SECURITY_GROUPS
+echo $SECURITY_GROUPS
+
+aws ec2 create-tags \
+    --tags "Key=karpenter.sh/discovery,Value=${CLUSTER_NAME}" \
+    --resources ${SECURITY_GROUPS}
+
 
 echo $CLUSTER_NAME
 echo $CLUSTER_ENDPOINT
