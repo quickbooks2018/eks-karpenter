@@ -1,6 +1,6 @@
-# cloudgeeks.co
+# cloudgeeks.ca
 
-##### https://cloudgeeks.co/
+##### https://cloudgeeks.ca/
 
 ### Backend ###
 ##### S3
