@@ -166,5 +166,6 @@ module "karpernter_installation" {
   iam_assumable_role_karpenter_iam_role_arn = module.karpenter_controller_iam_role.iam_assumable_role_karpenter_iam_role_arn
   kubeconfig                                = module.eks.kubeconfig
   depends_on                                = [module.eks.kubeconfig]
+  cluster_ca_certificate                    = base64decode(module.eks.cluster_certificate_authority_data)
   karpenter_version                         = "v0.5.3"
 }
