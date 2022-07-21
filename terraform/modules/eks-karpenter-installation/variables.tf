@@ -21,3 +21,7 @@ variable "instance_profile" {
 variable "karpenter_version" {
   type = string
 }
+
+variable "cluster_ca_certificate" {
+  type = string
+}
