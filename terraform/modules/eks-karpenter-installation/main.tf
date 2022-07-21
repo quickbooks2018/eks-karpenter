@@ -1,3 +1,21 @@
+locals {
+  cluster_name = var.cluster_name
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = var.cluster_endpoint
+    cluster_ca_certificate = var.cluster_ca_certificate
+    
+# aws eks get-token --cluster-name cloudgeeks-eks-prd | jq '.apiVersion'
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", local.cluster_name]
+    }
+  }
+}
+
 resource "helm_release" "karpenter" {
   depends_on       = [var.kubeconfig]
   namespace        = "karpenter"
