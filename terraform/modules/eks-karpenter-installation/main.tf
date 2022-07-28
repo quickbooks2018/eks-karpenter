@@ -7,7 +7,7 @@ provider "helm" {
     host                   = var.cluster_endpoint
     cluster_ca_certificate = var.cluster_ca_certificate
     
-# aws eks get-token --cluster-name cloudgeeks-eks-dev | jq '.apiVersion'
+# aws eks get-token --cluster-name cloudgeeks-eks-dev | jq '.apiVersion'    # Note: Install the lastest version of terraform & awscli is must 
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
