@@ -1,3 +1,6 @@
+########################################################
+# Must Install the latest version of aws cli & terraform
+########################################################
 terraform {
   required_providers {
     aws = {
