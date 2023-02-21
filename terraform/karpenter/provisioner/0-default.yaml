@@ -33,7 +33,7 @@ kind: AWSNodeTemplate
 metadata:
   name: my-provider
 spec:
-  instanceProfile: eks-e2c339d9-8e0b-de1b-d834-1b83e52ef504
+  instanceProfile: eks-e2c339d9-8e0b-de1b-d834-1b83e52ef504  # aws iam list-instance-profiles --query InstanceProfiles --output json
   subnetSelector:
     kubernetes.io/cluster/cloudgeeks-eks-dev: owned
   securityGroupSelector:
