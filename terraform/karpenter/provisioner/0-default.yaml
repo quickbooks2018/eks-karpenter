@@ -21,7 +21,7 @@ spec:
     - key: karpenter.k8s.aws/instance-family
       operator: In
       values: [t3a]
-    # Exclude small instance sizes
+    # Instance sizes
     - key: karpenter.k8s.aws/instance-size
       operator: In #NotIn
       values: [medium]
