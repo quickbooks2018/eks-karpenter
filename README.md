@@ -10,9 +10,9 @@
 
 ```console
 
-aws s3api create-bucket --bucket cloudgeeks-terraform --region us-east-1
+aws s3api create-bucket --bucket cloudgeeksca-terraform --region us-east-1
 
-aws s3api put-bucket-versioning --bucket cloudgeeks-terraform --versioning-configuration Status=Enabled
+aws s3api put-bucket-versioning --bucket cloudgeeksca-terraform --versioning-configuration Status=Enabled
 
 ```
 
