@@ -1,0 +1,60 @@
+# Get the current deployment using the command
+kubectl get deployment -n default
+
+# Get the revision history of the deployment using the command
+kubectl rollout history deployment <deployment_name>
+
+kubectl rollout history deployment app-cloudgeeks
+
+# Rollback to the desired revision using the command
+kubectl rollout undo deployment <deployment_name> --to-revision=<revision_number>
+
+kubectl rollout undo deployment app-cloudgeeks --to-revision=3
+
+# Image
+kubectl rollout history deployment <deployment_name> --output=yaml | grep "image:\|revision:"
+
+##########################################################################################
+kubectl rollout history deployment app-cloudgeeks --output=yaml | grep "image:\|revision:"
+##########################################################################################
+
+
+# To get the active revision of a deployment in Kubernetes, the following command can be used:
+kubectl rollout status deployment <deployment_name>
+
+kubectl rollout status deployment app-cloudgeeks
+
+
+
+
+# Requirement
+
+# Create a Deployment
+####################################################################################################
+kubectl create deployment nginx --image=nginx:stable --namespace=test --replicas=3 -o yaml --dry-run
+#####################################################################################################
+
+# Update a Deployment
+###################################################
+EDITOR=vim kubectl edit deployment/nginx -n default
+###################################################
+
+# Deployment History
+#################################################################################
+kubectl rollout history deployment/nginx --output=yaml | grep "image:\|revision:"
+##################################################################################
+
+# Rollback to the desired revision using the command
+#####################################################
+kubectl rollout undo deployment/nginx --to-revision=1
+#####################################################
+
+#######################
+# Create a replica set
+#######################
+kubectl create rs --help
+
+##############
+# Create a pod
+##############
+kubectl run pod --help

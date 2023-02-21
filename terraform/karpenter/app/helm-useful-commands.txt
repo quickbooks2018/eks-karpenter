@@ -1,0 +1,499 @@
+https://artifacthub.io/
+
+helm ls -A
+helm repo ls
+helm template dirname
+
+####################################
+# Helm Lint for Helm Syntax Checking
+####################################
+helm lint dirname
+
+helm plugin ls
+
+######################
+# Basic Sample Release
+######################
+helm create hello
+cd hello
+helm install hello ./ -f values.yaml --namespace datree --create-namespace --debug --dry-run
+
+cd ..
+helm template -f hello/values.yaml --namespace datree --create-namespace hello/ --dry-run
+
+
+helm install hello ./ -f values.yaml --namespace datree --create-namespace --debug
+
+
+helm upgrade --install hello ./ -f values.yaml --namespace datree --create-namespace --debug
+###############
+# Helm Template
+###############
+-----------------------------------------
+Note: Difference between Teample & Dryrun
+-----------------------------------------
+Template output is pure yaml does not need k8 connectivity with API Server
+Dy Run out is not pure yaml does need k8 connectivity with k8 API Server
+
+helm template dirname
+
+helm template -f env.yaml helloworld 
+
+ helm template -f env.yaml ./
+ 
+ helm template -f helloworld/env.yaml helloworld/
+ 
+helm upgrade --install nginx-alpine -f custom-values.yaml -f env.yaml ./ --namespace default --create-namespace
+
+helm template -f hello/values.yaml --namespace datree --create-namespace hello/
+
+helm template -f hello/values.yaml --namespace datree --create-namespace hello/ > pureyaml.yaml
+
+helm template -f hello/values.yaml --namespace datree --create-namespace hello/ --dry-run # Note: dry run will talk to kubernetes API server & output of this is proper yaml
+
+
+#############
+# Diff Plugin
+#############
+# https://github.com/databus23/helm-diff
+
+helm plugin ls
+
+helm plugin install https://github.com/databus23/helm-diff 
+
+helm history release-name -n learning
+
+helm diff revision release-name 1 2
+
+helm diff revision hello 1 2 -n learning
+
+hub wordpress  --max-col-width=0  | grep -i bitnami/wordpress
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+########
+# README
+########
+helm show readme bitnami/wordpress --version 10.0.3
+
+##########
+# Versions
+##########
+helm search repo wordpress --versions
+
+########
+# Values
+########
+helm show values bitnami/wordpress --version 10.0.3 
+
+wordpressUsername: cloudgeeks
+wordpressPassword: cloudgeeks
+wordpressEmail: info@cloudgeeks.ca
+wordpressFirstName: Muhammad
+wordpressLastName: Asim
+wordpressBlogName: cloudgeeks.ca
+service: 
+  type: LoadBalancer
+
+##############
+# Installation
+##############
+helm upgrade --install wordpress bitnami/wordpress  --values=wordpress-values.yaml --namespace wordpress --create-namespace --version 10.0.3 --debug
+
+#######
+# Watch
+#######
+watch -x kubectl get all --namespace wordpress
+
+########
+# Dryrun
+########
+helm install --dry-run --debug
+ 
+ helm install nginx-alpine ./ -f values.yaml --namespace learning --create-namespace --debug --dry-run
+ 
+             # release-name
+helm install nginx-alpine --debug --dry-run helloworld
+
+             # environment variable file
+helm install nginx-alpine -f helloworld/env.yaml helloworld  --debug --dry-run
+
+               # release-name-absent
+helm install -f helloworld/env.yaml helloworld  --debug --dry-run 
+
+helm install -f helloworld/env.yaml helloworld  --debug --dry-run --generate-name
+
+###########
+# Rollback
+###########
+             # release-name
+helm rollback nginx-alpine 1 --debug
+
+#########
+# History
+#########
+helm history release-name --debug
+
+##############
+# Helm Secrets
+##############
+SOPS is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, age, and PGP
+https://github.com/mozilla/sops/releases
+
+curl -LO -# https://github.com/mozilla/sops/releases/download/v3.7.2/sops-v3.7.2.linux.amd64
+
+mv sops-v3.7.2.linux.amd64 sops
+chmod +x sops
+mv sops /usr/local/bin
+
+# Modern encryption tool age (AGE)
+https://github.com/FiloSottile/age
+age is a simple, modern and secure file encryption tool, format, and Go library.
+
+apt install -y age
+
+age-keygen -o key.txt
+
+mkdir -p ~/.config/sops/age
+
+mv key.txt ~/.config/sops/age/keys.txt
+
+# this will create default encryption rules  # copy public key from key.txt age1z03hnu6s5a37hahytvl8y7zme669r47p0yz2zwfss5quz3t83sgs23n5ha
+cat << EOF > .sops.yaml
+creation_rules:
+  -  age: age1zq6mygn07kzvt2ar435ea2jvy9pg52ta5zczjeq0kmjzw8cv0vcqr3hl0t
+
+EOF
+
+cat << EOF > values.secrets.yaml
+username: "root"
+password: "12345678"
+EOF
+
+#########
+# Encrypt
+##########
+helm secrets enc values.secrets.yaml
+
+#########
+# Decrypt
+#########
+helm secrets dec values.secrets.yaml
+
+helm secrets view values.secrets.yaml
+
+export GPG_TTY=$(tty) # incase of error
+
+################
+# Helm NOTES.txt
+################
+cat << EOF > NOTES.txt
+deployment command
+helm upgrade --install nginx-alpine ./ --namespace learning --create-namespace
+helm release name {{ .Release.Name }}
+helm chart name {{ .Chart.Name }}
+EOF
+
+#################
+# Sample Release
+#################
+helm create hello
+
+helm ---> templates ---> secrets.yaml
+
+cat << EOF > secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: credentials
+  labels:
+    app: app
+    chart: '{{ .Chart.Name }}-{{ .Chart.Version }}'
+    release: '{{ .Release.Name }}'
+    heritage: '{{ .Release.Service }}'
+type: Opaque
+data:
+  password: {{ .Values.password | b64enc | quote }}
+  username: {{ .Values.username | b64enc | quote }}
+
+EOF
+
+# Reference in deployment
+cat << EOF > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hello.fullname" . }}
+  labels:
+    {{- include "hello.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hello.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hello.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hello.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: credentials
+                  key: password
+            - name: MY_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: credentials
+                  key: username
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+EOF
+
+######################################
+# Helm command for secrets deployment
+######################################
+helm secrets install nginx-alpine ./ -f values.yaml -f values.secrets.yaml --namespace learning --create-namespace --debug
+
+helm secrets upgrade --install nginx-alpine ./ -f values.yaml -f values.secrets.yaml --namespace learning --create-namespace --debug
+
+
+##########
+# Helm Get 
+###########
+helm get INSTALLATIONNAME
+
+helm get INSTALLATIONNAME values
+# this will show the values of last deployment via helm
+
+helm get INSTALLATIONNAME values --all
+# this will show all the values of last deployment via helm
+
+helm get INSTALLATIONNAME values --revision 1
+# this will show the values of specific deployment via helm
+
+helm get INSTALLATIONNAME values --revision 2
+# this will show the values of specific deployment via helm
+
+###############
+# Helm Manifest
+################
+helm get manifest INSTALLATIONNAME
+# this will get the manifest of the existing last deployed 
+
+
+helm get manifest INSTALLATIONNAME --revision 1
+# this will get the manifest of the specific version deployed 
+
+
+helm get manifest INSTALLATIONNAME --revision 2
+# this will get the manifest of the specific version deployed 
+
+##############
+# Helm History
+##############
+kubectl get secrets -n default
+# this will show also the helm versions as well
+
+helm history INSTALLATIONNAME
+# this will show all the deployed history with revisions
+
+###############
+# Helm RollBack
+###############
+helm rollback INSTALLATIONNAME 1
+# Rollback to revision 1
+
+helm rollback INSTALLATION 3
+# Rollback to revision 3
+
+##################################
+# Helm Uninstall with Keep History
+##################################
+helm uninstall INSTALLATIONNAME --keep-history
+# Even after you uninstall the history will be there in secrets section & you can again redeploy with Helm RollBack
+
+##############
+# Helm TimeOut 
+##############
+helm upgrade --install nginx-alpine -f custom-values.yaml -f env.yaml ./ --namespace default --create-namespace --wait --timeout 10m25s --debug
+
+# this is usefull when your installation is taking more time example: image pull take time or network latency issues
+
+#############
+# Helm Atomic
+#############
+helm upgrade --install nginx-alpine -f custom-values.yaml -f env.yaml ./ --namespace default --create-namespace --atomic -timeout 10m25s
+# atomic mean it will wait till all the k8 resources are succesfully deployed. default is 5 min
+# default timeout is 5 minutes
+# Note --wait be enabled automatically with ATOMIC
+# this is very usefull in CICD, incase of failed existing deployment, it will automatically rollback to previously successfull deployment
+
+####################################
+# Helm Atomic With CleanUp on Failure
+#####################################
+helm upgrade --install nginx-alpine -f custom-values.yaml -f env.yaml ./ --namespace default --create-namespace --atomic -timeout 10m25s --cleanup-on-fail --debug
+# atomic mean it will wait till all the k8 resources are succesfully deployed. default is 5 min
+# cleanup-on-fail means it will cleanup all the resources if deployment is failed with new release
+# default timeout is 5 minutes
+# Note --wait be enabled automatically with ATOMIC
+# this is very usefull in CICD, incase of failed existing deployment, it will automatically rollback to previously successfull deployment & with cleanup
+
+
+############
+# Helm Force
+############
+helm upgrade --install nginx-alpine -f custom-values.yaml -f env.yaml ./ --namespace default --create-namespace --force --debug
+# Do not use this in CICD, sometimes you want to delete the deployment & recreate it, this option will be helpfull.
+
+####################
+# Packing helm chart
+####################
+helm package -d ${PWD}/helm ${PWD}/helm/cloudgeeks
+
+########
+# Issues 
+########
+# Helm Upgrade release stuck in pending state
+# https://community.ops.io/the_cozma/k8s-fix-helm-release-failing-with-an-upgrade-still-in-progress-4660
+
+[K8s] Fix Helm release failing with an upgrade still in progress
+#
+kubernetes
+#
+devops
+#
+tutorials
+#
+helm
+This article applies to: Helm v3.8.0
+
+Helm helps you manage Kubernetes applications — Helm Charts help you define, install, and upgrade even the most complex Kubernetes application. More details on Helm and the commands can be found in the official documentation.
+
+Assuming you use Helm to handle your releases, you might end up in a case where the release will be stuck in a pending state and all subsequent releases will keep failing.
+
+This could happen if:
+
+you run the upgrade command from the cli and accidentally (or not) interrupt it or
+you have two deploys running at the same time (maybe in Github Actions, for example)
+Basically any interruption that occurred during your install/upgrade process could lead you to a state where you cannot install another release anymore.
+
+In the release logs the failing upgrade will show an error similar to the following:
+Error: UPGRADE FAILED: release <name> failed, and has been rolled back due to atomic being set: timed out waiting for the condition
+Error: Error: The process '/usr/bin/helm3' failed with exit code 1
+Error: The process '/usr/bin/helm3' failed with exit code 1
+And the status will be stuck in: PENDING_INSTALL or PENDING_UPGRADE depending on the command you were running.
+
+Because of this pending state when you run the command to list all release it will return empty:
+> helm list --all                                                                               
+NAME    NAMESPACE   REVISION    UPDATED STATUS  CHART   APP VERSION
+So what can we do now? In this article we will look over the two options described below. Keep in mind that based on your setup it could be another issue, but I'm hoping that these two pointers will give you a place to start.
+
+Roll back to the previous working version using the helm rollback command.
+Delete the helm secret associated with the release and re-run the upgrade command.
+So let's look at each option in detail.
+
+First option: Roll back to the previous working version using the helm rollback command
+From the official documentation:
+
+This command rolls back a release to a previous revision.
+The first argument of the rollback command is the name of a release, and the second is a revision (version) number. If this argument is omitted, it will roll back to the previous release.
+
+So, in this case, let's get the history of the releases:
+helm history <releasename> -n <namespace>
+In the output you will notice the STATUS of your release with: pending-upgrade:
+REVISION UPDATED                  STATUS          CHART     APP VERSION DESCRIPTION
+1        Wed May 25 11:45:40 2022 DEPLOYED        api-0.1.0 1.16.0      Upgrade complete
+2        Mon May 30 14:32:46 2022 PENDING_UPGRADE api-0.1.0 1.16.0      Preparing upgrade
+Now let's perform the rollback by running the following command:
+helm rollback <release> <revision> --namespace <namespace>
+So in our case we run:
+> helm rollback api 1 --namespace api
+Rollback was a success.
+After we get confirmation that the rollback was successful, we run the command to get the history again.
+
+We now see we have two releases and that our rollback was successful having the STATUS is: deployed
+> helm history api -n api
+
+REVISION UPDATED                  STATUS      CHART     APP VERSION DESCRIPTION
+1        Wed May 25 11:45:40 2022 SUPERSEEDED api-0.1.0 1.16.0      Upgrade complete
+2        Mon May 30 14:32:46 2022 SUPERSEEDED api-0.1.0 1.16.0      Preparing upgrade
+3        Mon May 30 14:45:46 2022 DEPLOYED    api-0.1.0 1.16.0      Rollback to 1
+So what if the solution above didn't work?
+
+Second option: Delete the helm secret associated with the release and re-run the upgrade command
+First we get all the secrets for the namespace by running:
+kubectl get secrets -n <namespace>
+In the output you will notice a list of secrets in the following format:
+NAME                        TYPE               DATA AGE
+api                         Opaque             21   473d
+sh.helm.release.v1.api.v648 helm.sh/release.v1 1    6d5h
+sh.helm.release.v1.api.v649 helm.sh/release.v1 1    5d1h
+sh.helm.release.v1.api.v650 helm.sh/release.v1 1    57m
+So what's in a secret?
+
+Helm3 makes use of the Kubernetes Secrets object to store any information regarding a release. These secrets are basically used by Helm to store and read it's state every time we run: helm list, helm history or helm upgrade in our case.
+
+The naming of the secrets is unique per namespace.
+The format follows the following convention:
+sh.helm.release.v1.<release_name>.<release_version>.
+
+There is a max of 10 secrets that are stored by default, but you can modify this by setting the --history-max flag in your helm upgrade command.
+
+--history-max int limit the maximum number of revisions saved per release. Use 0 for no limit (default 10)
+
+Now that we know what these secrets are used for, let's delete the helm secret associated with the pending release by running the following command:
+kubectl delete secret sh.helm.release.v1.<release_name>.v<release_version> -n <namespace>
+Finally, we re-run the helm upgrade command (either from command line or from your deployment workflow), which, if all was good so far, should succeed.
+
+There is an open issue with Helm so hopefully these workaround won't be needed anymore. But it's open since 2018.
+
+Of course there could be other cases or issues, but I hope this is a nice place to start. If you ran into something similar I would love to read your input in what the issue was and how you solved it especially since I didn't find the error message to be intuitive.
+
+
+# Bitnami Old HELM Repos
+# https://github.com/bitnami/charts/issues/10542
+# repository: https://raw.githubusercontent.com/bitnami/charts/pre-2022/bitnami

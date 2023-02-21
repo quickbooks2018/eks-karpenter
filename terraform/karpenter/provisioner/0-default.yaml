@@ -1,0 +1,37 @@
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: default
+spec:
+  instanceProfile: Karpenter-cloudgeeks-eks-dev-20230221032359133100000004 # aws iam list-instance-profiles --query InstanceProfiles --output json
+  subnetSelector:
+    karpenter.sh/discovery/cloudgeeks-eks-dev: 'cloudgeeks-eks-dev'
+  securityGroupSelector:
+    karpenter.sh/discovery/cloudgeeks-eks-dev: 'cloudgeeks-eks-dev'
+  tags:
+    karpenter.sh/discovery/cloudgeeks-eks-dev: 'cloudgeeks-eks-dev'
+
+---
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default
+spec:
+  requirements:
+    - key: "topology.kubernetes.io/zone"
+      operator: In
+      values: [us-east-1a, us-east-1b, us-east-1c]
+    - key: "karpenter.sh/capacity-type"
+      operator: In
+      values: ["spot"]
+  limits:
+    resources:
+      cpu: 30
+  providerRef:
+    name: default
+  labels:
+    type: karpenter
+    provisioner: default
+  consolidation:
+    enabled: true
+  ttlSecondsUntilExpired: 86400

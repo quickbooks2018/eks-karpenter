@@ -1,0 +1,26 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-1
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: quickbooks2018/green:latest
+        ports:
+        - containerPort: 80
+      tolerations:
+      - key: provisioner/app
+        operator: Equal
+        value: null
+        effect: NoSchedule
