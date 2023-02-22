@@ -26,14 +26,14 @@ terraform {
 # S3
 ###############
 
-#terraform {
-#  backend "s3" {
-#    bucket         = "cloudgeeksca-terraform"
-#    key            = "env/dev/cloudgeeks-dev.tfstate"
-#    region         = "us-east-1"
-#   # dynamodb_table = "cloudgeeksca-dev-terraform-backend-state-lock"
-#  }
-#}
+terraform {
+  backend "s3" {
+    bucket         = "cloudgeeksca-terraform"
+    key            = "env/dev/cloudgeeks-dev.tfstate"
+    region         = "us-east-1"
+   # dynamodb_table = "cloudgeeksca-dev-terraform-backend-state-lock"
+  }
+}
 
 
 locals {
