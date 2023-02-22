@@ -2,7 +2,7 @@
 # https://karpenter.sh/v0.23.0/getting-started/getting-started-with-eksctl/
 
 #####################
-# Eksctl instaalation
+# Eksctl installation
 #####################
 curl -# -LO https://github.com/weaveworks/eksctl/releases/download/v0.130.0/eksctl_Linux_amd64.tar.gz
 tar -xzvf eksctl_Linux_amd64.tar.gz
