@@ -26,14 +26,20 @@ spec:
       operator: In #NotIn
       values: [medium]
   providerRef:
-    name: my-provider
+    name: cloudgeeks-ca-provider
+  labels:
+        type: karpenter
+        provisioner: default
+  taints:
+    - key: provisioner/default
+      effect: NoSchedule
 ---
 apiVersion: karpenter.k8s.aws/v1alpha1
 kind: AWSNodeTemplate
 metadata:
-  name: my-provider
+  name: cloudgeeks-ca-provider
 spec:
-  instanceProfile: eks-e2c339d9-8e0b-de1b-d834-1b83e52ef504  # aws iam list-instance-profiles --query InstanceProfiles --output json
+  instanceProfile: KarpenterNodeInstanceProfile-cloudgeeks-eks-dev # aws iam list-instance-profiles --query InstanceProfiles --output json
   subnetSelector:
     kubernetes.io/cluster/cloudgeeks-eks-dev: owned
   securityGroupSelector:

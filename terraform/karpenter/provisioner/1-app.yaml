@@ -26,7 +26,7 @@ spec:
       operator: In #NotIn
       values: [medium]
   providerRef:
-    name: my-provider
+    name: cloudgeeks-ca-provider
   labels:
       type: karpenter
       provisioner: app
