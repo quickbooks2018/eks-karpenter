@@ -26,14 +26,14 @@ terraform {
 # S3
 ###############
 
-terraform {
-  backend "s3" {
-    bucket         = "cloudgeeksca-terraform"
-    key            = "env/dev/cloudgeeks-dev.tfstate"
-    region         = "us-east-1"
-   # dynamodb_table = "cloudgeeksca-dev-terraform-backend-state-lock"
-  }
-}
+#terraform {
+#  backend "s3" {
+#    bucket         = "cloudgeeksca-terraform"
+#    key            = "env/dev/cloudgeeks-dev.tfstate"
+#    region         = "us-east-1"
+#   # dynamodb_table = "cloudgeeksca-dev-terraform-backend-state-lock"
+#  }
+#}
 
 
 locals {
@@ -183,17 +183,13 @@ module "eks" {
     "karpenter.sh/discovery/${local.cluster_name}" = local.cluster_name
   }
 
-  iam_role_additional_policies = {
-    AmazonEKSVPCResourceController = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
-    AmazonSSMManagedInstanceCore   =  "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
-    AmazonEBSCSIDriverPolicy       = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-  }
 
  # Sub Module
 
   # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest/submodules/eks-managed-node-group
 
   eks_managed_node_groups = {
+
     on-demand = {
       min_size      = 2
       max_size      = 2
@@ -201,6 +197,13 @@ module "eks" {
       update_config = {
         max_unavailable = 1
       }
+
+      iam_role_additional_policies = {
+        AmazonEKSVPCResourceController = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
+        AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+        AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
+
 
       create_launch_template     = true
       instance_types             = ["t3a.medium"]
@@ -241,6 +244,13 @@ module "eks" {
       min_size     = 0
       max_size     = 1
       desired_size = 0
+
+      iam_role_additional_policies = {
+        AmazonEKSVPCResourceController = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
+        AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore",
+        AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      }
+
 
       create_launch_template = true
       instance_types = ["t3a.medium"]
