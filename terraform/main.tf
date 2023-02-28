@@ -152,6 +152,8 @@ module "eks" {
       self        = true
     }
 
+
+
     egress_all = {
       description      = "Egress allow all"
       protocol         = "-1"
@@ -289,8 +291,39 @@ module "eks" {
     "karpenter.sh/discovery/${local.cluster_name}" = local.cluster_name
   }
 
+
+  manage_aws_auth_configmap = true
+  aws_auth_roles = [
+    {
+      rolearn  = module.eks_admins_iam_role.iam_role_arn
+      username = module.eks_admins_iam_role.iam_role_name
+      groups   = ["system:masters"]
+    },
+  ]
+
 }
 
+# https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2009
+data "aws_eks_cluster" "default" {
+  name = module.eks.cluster_name
+}
+
+data "aws_eks_cluster_auth" "default" {
+  name = module.eks.cluster_name
+}
+
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.default.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)
+  # token                  = data.aws_eks_cluster_auth.default.token
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.default.id]
+    command     = "aws"
+  }
+}
 
 ######
 # Mysql
@@ -330,4 +363,77 @@ module "rds_mysql" {
   performance_insights_enabled                             = false
 
   depends_on                                               = [module.vpc]
+}
+
+
+# EKS Cluster Access IAM Group creation add users in this eks-admin group from AWS IAM Console
+module "allow_eks_access_iam_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "5.3.1"
+
+  name          = "allow-eks-access"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "eks:DescribeCluster",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+module "eks_admins_iam_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
+  version = "5.3.1"
+
+  role_name         = "eks-admin"
+  create_role       = true
+  role_requires_mfa = false
+
+  custom_role_policy_arns = [module.allow_eks_access_iam_policy.arn]
+
+  trusted_role_arns = [
+    "arn:aws:iam::${module.vpc.vpc_owner_id}:root"
+  ]
+}
+
+
+
+module "allow_assume_eks_admins_iam_policy" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
+  version = "5.3.1"
+
+  name          = "allow-assume-eks-admin-iam-role"
+  create_policy = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "sts:AssumeRole",
+        ]
+        Effect   = "Allow"
+        Resource = module.eks_admins_iam_role.iam_role_arn
+      },
+    ]
+  })
+}
+
+
+
+module "eks_admins_iam_group" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
+  version = "5.3.1"
+
+  name                              = "eks-admin"
+  attach_iam_self_management_policy = false
+  create_group                      = true
+  custom_group_policy_arns          = [module.allow_assume_eks_admins_iam_policy.arn]
 }
