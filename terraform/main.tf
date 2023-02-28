@@ -313,7 +313,7 @@ module "rds_mysql" {
   allocated_storage                                        = "50"
   storage_type                                             = "gp2"
   engine                                                   = "mysql"
-  engine_version                                           = "5.7"
+  engine_version                                           = "5.7.41"
   instance_class                                           = "db.t3.micro"
   backup_retention_period                                  = "1"
   backup_window                                            = "03:00-04:00"
