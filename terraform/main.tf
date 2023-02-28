@@ -388,6 +388,7 @@ module "allow_eks_access_iam_policy" {
   })
 }
 
+# EKS Admin IAM Role
 module "eks_admins_iam_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.3.1"
@@ -404,7 +405,7 @@ module "eks_admins_iam_role" {
 }
 
 
-
+# STS Policy to Assume EKS Admin IAM Role
 module "allow_assume_eks_admins_iam_policy" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
   version = "5.3.1"
@@ -427,7 +428,7 @@ module "allow_assume_eks_admins_iam_policy" {
 }
 
 
-
+# Create IAM Group & attach STS Policy
 module "eks_admins_iam_group" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
   version = "5.3.1"
