@@ -7,7 +7,7 @@ aws configure --profile user1
 aws sts get-caller-identity --profile user1
 aws eks update-kubeconfig --name cloudgeeks-eks-dev --profile eks-admin --region us-east-1 
 kubectl auth can-i "*" "*" --all-namespaces
-```
+
 
 [default]
 region = us-east-1
