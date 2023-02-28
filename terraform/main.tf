@@ -366,7 +366,7 @@ module "rds_mysql" {
 }
 
 
-# EKS Cluster Access IAM Group creation add users in this eks-admin group from AWS IAM Console
+# Simple IAM Policy creation to allow EKS access
 module "allow_eks_access_iam_policy" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-policy"
   version = "5.3.1"
@@ -428,6 +428,7 @@ module "allow_assume_eks_admins_iam_policy" {
 }
 
 
+# EKS Cluster Access IAM Group creation add users in this eks-admin group from AWS IAM Console
 # Create IAM Group & attach STS Policy
 module "eks_admins_iam_group" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-group-with-policies"
