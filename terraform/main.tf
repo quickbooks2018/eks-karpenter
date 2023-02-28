@@ -56,6 +56,7 @@ module "vpc" {
   azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
   private_subnets = ["10.60.0.0/23", "10.60.2.0/23", "10.60.4.0/23"]
   public_subnets  = ["10.60.100.0/23", "10.60.102.0/24", "10.60.104.0/24"]
+  database_subnets = ["10.60.11.0/24", "10.60.12.0/24", "10.60.13.0/24"]
 
 
   map_public_ip_on_launch = true
@@ -64,6 +65,7 @@ module "vpc" {
   one_nat_gateway_per_az  = false
 
   create_database_subnet_group           = true
+  database_subnet_group_name             = "cloudgeeks-eks-dev"
   create_database_subnet_route_table     = true
   create_database_internet_gateway_route = false
   create_database_nat_gateway_route      = true
@@ -289,3 +291,43 @@ module "eks" {
 
 }
 
+
+######
+# Mysql
+#######
+locals {
+  name = "cloudgeeks-mysql"
+  tags = {
+    Name = local.name
+  }
+}
+
+
+
+module "rds_mysql" {
+  source  = "terraform-aws-modules/rds/aws//modules/db_instance"
+  version = "5.6.0"
+
+  identifier                                               = local.name
+  final_snapshot_identifier_prefix                         = "mydb-final-snap-shot"
+  allocated_storage                                        = "50"
+  storage_type                                             = "gp2"
+  engine                                                   = "mysql"
+  engine_version                                           = "5.7"
+  instance_class                                           = "db.t3.micro"
+  backup_retention_period                                  = "1"
+  backup_window                                            = "03:00-04:00"
+  publicly_accessible                                      = false
+  db_name                                                  = "cloudgeeks"
+  username                                                 = "dbadmin"
+  password                                                 = var.password
+  vpc_security_group_ids                                   = [module.vpc.default_security_group_id]
+  db_subnet_group_name                                     = module.vpc.database_subnet_group_name
+  skip_final_snapshot                                      = true
+  multi_az                                                 = false
+  storage_encrypted                                        = true
+  deletion_protection                                      = false
+  performance_insights_enabled                             = false
+
+  depends_on                                               = [module.vpc]
+}
