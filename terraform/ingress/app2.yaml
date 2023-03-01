@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  namespace: app2
+spec:
+  selector:
+    matchLabels:
+      app: app2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - image: quickbooks2018/blue:latest
+        name: app2
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app2
+  namespace: app2
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  type: ClusterIP
+  selector:
+    app: app2
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app2
+  namespace: app2
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: cloudgeeksca
+spec:
+  ingressClassName: alb
+  rules:
+    - host: app2.saqlainmushtaq.com
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: app2
+                port:
+                  number: 80

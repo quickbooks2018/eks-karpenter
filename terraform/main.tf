@@ -451,3 +451,5 @@ module "eks_admins_iam_group" {
   create_group                      = true
   custom_group_policy_arns          = [module.allow_assume_eks_admins_iam_policy.arn]
 }
+
+
