@@ -343,7 +343,8 @@ module "rds_mysql" {
   db_name                                                  = "cloudgeeks"
   username                                                 = "dbadmin"
   password                                                 = var.password
-  vpc_security_group_ids                                   = [module.vpc.default_security_group_id]
+  vpc_security_group_ids                                   = [module.vpc.default_security_group_id,
+                                                              module.eks.node_security_group_id]
   db_subnet_group_name                                     = module.vpc.database_subnet_group_name
   skip_final_snapshot                                      = true
   multi_az                                                 = false
