@@ -10,6 +10,15 @@ terraform {
         version = "4.55.0"
     }
 
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.14.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.6.0"
+    }
+
   }
 }
 
@@ -306,10 +315,12 @@ module "eks" {
 # https://github.com/terraform-aws-modules/terraform-aws-eks/issues/2009
 data "aws_eks_cluster" "default" {
   name = module.eks.cluster_name
+
 }
 
 data "aws_eks_cluster_auth" "default" {
   name = module.eks.cluster_name
+
 }
 
 
@@ -323,6 +334,7 @@ provider "kubernetes" {
     args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.default.id]
     command     = "aws"
   }
+
 }
 
 ######
