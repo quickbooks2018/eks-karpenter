@@ -7,7 +7,7 @@
 EKS_CLUSTER="cloudgeeks-eks-dev"
 REGION="us-east-1"
 MY_AWS_ACCOUNT="$(aws sts get-caller-identity --query Account --output text)"
-ROLE_NAME="on-demand-eks-node-group-20230301023002388400000006"
+ROLE_NAME="on-demand-eks-node-group-20230310023348924900000006"
 
 AWS_ACCOUNT_ID="602401143452"
 # https://docs.aws.amazon.com/eks/latest/userguide/add-ons-images.html
