@@ -1,0 +1,1 @@
+helm upgrade --install app3 --namespace app3 --create-namespace --values hello/values.yaml --wait hello/

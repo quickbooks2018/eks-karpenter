@@ -43,8 +43,8 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/group.name: cloudgeeksca
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:076617516782:certificate/b7705936-4953-4a1b-bb33-3f308249467d
-    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:850058243890:certificate/0b072294-4563-43c2-be39-a969c759c586
+   # alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     alb.ingress.kubernetes.io/backend-protocol: HTTPS
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
@@ -58,11 +58,13 @@ metadata:
     alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
     alb.ingress.kubernetes.io/success-codes: '200,302'
     alb.ingress.kubernetes.io/load-balancer-attributes: deletion_protection.enabled=false
+   # External DNS - For creating a Record Set in Route53
+    external-dns.alpha.kubernetes.io/hostname: app1.cmcloudlab419.info
 
 spec:
   ingressClassName: alb
   rules:
-    - host: app1.saqlainmushtaq.com
+    - host: app1.cmcloudlab419.info
       http:
         paths:
           - path: /
