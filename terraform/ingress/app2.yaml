@@ -42,6 +42,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/group.name: cloudgeeksca
+    alb.ingress.kubernetes.io/group.order: '2'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:801418947411:certificate/8a410bc4-615b-44ff-b38e-d4434608d9e7
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     alb.ingress.kubernetes.io/load-balancer-name: cloudgeeks-alb
